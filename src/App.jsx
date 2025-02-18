@@ -5,12 +5,15 @@ import Modal from "./components/Modal.jsx";
 import DeleteConfirmation from "./components/DeleteConfirmation.jsx";
 import logoImg from "./assets/logo.png";
 import AvailablePlaces from "./components/AvailablePlaces.jsx";
+import Error from "./components/Error.jsx";
 import { UpdateUserPlaces } from "./http.js";
 
 function App() {
   const selectedPlace = useRef();
 
   const [userPlaces, setUserPlaces] = useState([]);
+
+  const [errorUpdatingPlaces, setErrorUpdatingPlaces] = useState();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -24,6 +27,8 @@ function App() {
   }
 
   async function handleSelectPlace(selectedPlace) {
+    // await UpdateUserPlaces([selectedPlace, ...userPlaces]);
+    // if you will handle a loader you will send the data first like above
     setUserPlaces((prevPickedPlaces) => {
       if (!prevPickedPlaces) {
         prevPickedPlaces = [];
@@ -36,10 +41,16 @@ function App() {
     try {
       await UpdateUserPlaces([selectedPlace, ...userPlaces]);
     } catch (error) {
-      // handle error
+      setUserPlaces(userPlaces);
+      setErrorUpdatingPlaces({
+        message:
+          error.message || "Failed to update places. Please try again later.",
+      });
     }
   }
-
+  function handleError() {
+    setErrorUpdatingPlaces(null);
+  }
   const handleRemovePlace = useCallback(async function handleRemovePlace() {
     setUserPlaces((prevPickedPlaces) =>
       prevPickedPlaces.filter((place) => place.id !== selectedPlace.current.id)
@@ -50,6 +61,15 @@ function App() {
 
   return (
     <>
+      <Modal open={errorUpdatingPlaces} onClose={handleError}>
+        {errorUpdatingPlaces && (
+          <Error
+            title="An error occurred"
+            message={errorUpdatingPlaces.message}
+            onConfirm={handleError}
+          />
+        )}
+      </Modal>
       <Modal open={modalIsOpen} onClose={handleStopRemovePlace}>
         <DeleteConfirmation
           onCancel={handleStopRemovePlace}
