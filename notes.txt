@@ -1,0 +1,2 @@
+solving the setfetching false because if the prev status it will be false early befor the callback 
+of the navigator will executes so we put it in the right place in the clausure and in the catch
