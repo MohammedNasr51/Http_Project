@@ -51,13 +51,28 @@ function App() {
   function handleError() {
     setErrorUpdatingPlaces(null);
   }
-  const handleRemovePlace = useCallback(async function handleRemovePlace() {
-    setUserPlaces((prevPickedPlaces) =>
-      prevPickedPlaces.filter((place) => place.id !== selectedPlace.current.id)
-    );
-
-    setModalIsOpen(false);
-  }, []);
+  const handleRemovePlace = useCallback(
+    async function handleRemovePlace() {
+      setUserPlaces((prevPickedPlaces) =>
+        prevPickedPlaces.filter(
+          (place) => place.id !== selectedPlace.current.id
+        )
+      );
+      try {
+        await UpdateUserPlaces(
+          userPlaces.filter((place) => place.id !== selectedPlace.current.id)
+        );
+      } catch (error) {
+        setUserPlaces(userPlaces);
+        setErrorUpdatingPlaces({
+          message:
+            error.message || "Failed to delete place. Please try again later.",
+        });
+      }
+      setModalIsOpen(false);
+    },
+    [selectedPlace]
+  );
 
   return (
     <>
